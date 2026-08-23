@@ -37,13 +37,13 @@ add-highlighter shared/gherkin/code default-region group
 # Double quoted strings
 add-highlighter shared/gherkin/double_quote region %{(?<!')"} %{(?<!\\)(\\\\)*"} fill string
 # Triple quoted strings
-add-highlighter shared/gherkin/triple_quote region %{(?<!')"""} %{(?<!\\)(\\\\)*"""} fill bright-green
+add-highlighter shared/gherkin/triple_quote region %{(?<!')"""} %{(?<!\\)(\\\\)*"""} fill string
 # Comments - single line
 add-highlighter shared/gherkin/comment_line region %{#} %{$} fill comment
 # Tags
 add-highlighter shared/gherkin/code/ regex %{\h*(@[\w\d]+(-[\w\d]+)?)\b} 1:meta
 # Data table
-add-highlighter shared/gherkin/code/ regex %{(?S)^\h*(\|.*\|)$} 1:yellow
+add-highlighter shared/gherkin/code/ regex %{(?S)^\h*(\|.*\|)$} 1:value
 # Keywords
 add-highlighter shared/gherkin/code/ regex %{\b(Feature|Rule|Examples?|Scenarios?|Outline|Template|Given|When|Then|And|But|\*|Background)\b} 1:keyword
 

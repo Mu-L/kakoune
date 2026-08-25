@@ -1673,6 +1673,8 @@ HighlightPass parse_passes(StringView str)
             passes |= HighlightPass::Move;
         else if (pass == "wrap")
             passes |= HighlightPass::Wrap;
+        else if (pass == "replace")
+            passes |= HighlightPass::Replace;
         else
             throw runtime_error{format("invalid highlight pass: {}", pass)};
     }
@@ -1686,7 +1688,7 @@ const HighlighterDesc higlighter_group_desc = {
     "Parameters: [-passes <passes>]\n"
     "Creates a group that can contain other highlighters",
     { {
-        { "passes", { ArgCompleter{}, "flags(colorize|move|wrap) "
+        { "passes", { ArgCompleter{}, "flags(colorize|move|wrap|replace) "
                                        "kind of highlighters can be put in the group "
                                        "(default colorize)" } } },
         ParameterDesc::Flags::SwitchesOnlyAtStart, 0, 0
@@ -1704,7 +1706,7 @@ const HighlighterDesc ref_desc = {
     "Parameters: [-passes <passes>] <path>\n"
     "Reference the highlighter at <path> in shared highlighters",
     { {
-        { "passes", { ArgCompleter{}, "flags(colorize|move|wrap) "
+        { "passes", { ArgCompleter{}, "flags(colorize|move|wrap|replace) "
                                       "kind of highlighters that can be referenced "
                                       "(default colorize)" } } },
         ParameterDesc::Flags::SwitchesOnlyAtStart, 1, 1

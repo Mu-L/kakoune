@@ -29,16 +29,41 @@ provide-module odin %§
 
 add-highlighter shared/odin regions
 add-highlighter shared/odin/code default-region group
-add-highlighter shared/odin/string region %{(?<!')"} %{(?<!\\)(\\\\)*"} fill string
-add-highlighter shared/odin/rawstring region ` ` fill string
+add-highlighter shared/odin/string region %{(?<!')(?<!'\\)"} %{(?<!\\)(\\\\)*"} fill string
+add-highlighter shared/odin/rawstring region %{(?<!')(?<!'\\)`} ` fill string
 add-highlighter shared/odin/code/character regex %{(\b|\B)'((\\.)|[^'\\])'\B} 0:value
 
 add-highlighter shared/odin/comment region -recurse /\* /\* \*/ fill comment
 add-highlighter shared/odin/inline_documentation region /// $ fill documentation
 add-highlighter shared/odin/line_comment region // $ fill comment
 
-add-highlighter shared/odin/code/ regex "(?<!\w)@\w+\b" 0:meta
-add-highlighter shared/odin/code/operator regex "(=|!|#|@|\$|\^|\?|\+|-|\*|/|%|%%|&|\||~|&~|<<|>>|&&|\|\||\+=|-=|\*=|/=|%=|%%=|&=|\|=|~=|&~=|<<=|>>=|&&=|\|\|=|\+\+|--|---|==|!=|<|>|<=|>=|:|\.\.|\.\.=|\.\.<|\|\*\*)" 1:operator
+add-highlighter shared/odin/code/operator regex "(=|!|#|@|\$|\^|\?|\+|-|\*|/|%|%%|&|\||~|&~|<<|>>|&&|\|\||\+=|-=|\*=|/=|%=|%%=|&=|\|=|~=|&~=|<<=|>>=|&&=|\|\|=|\+\+|--|---|==|!=|<|>|<=|>=|:|(?<!\.)\.\.(?!\.)|\.\.=|\.\.<|\|\*\*)" 1:operator
+# octal
+add-highlighter shared/odin/code/ regex \
+  "\b0o(?i)[0-7][0-7_]*\b" 0:value
+# decimal
+add-highlighter shared/odin/code/ regex \
+  "(?i)\b[+-]?[0-9][0-9_]*(?:\.[0-9][0-9_]*)?(e[+-]?[0-9]+)?[ijk]?\b" 0:value
+# decimal
+add-highlighter shared/odin/code/ regex \
+  "\b0d(?i)[0-9][0-9_]*(e[+-]?[0-9]+)?\b" 0:value
+# dozenal
+add-highlighter shared/odin/code/ regex \
+  "\b0z(?i)[0-9a-b][0-9a-b_]*\b" 0:value
+# hexadecimal
+add-highlighter shared/odin/code/ regex \
+  "\b0x(?i)[0-9a-f][0-9a-f_]*\b" 0:value
+# hexadecimal floating point
+add-highlighter shared/odin/code/ regex \
+  "\b0h(?i)[0-9a-f][0-9a-f_]{3,15}\b" 0:value
+add-highlighter shared/odin/code/build-tag regex \
+  "(#\+\w+)(?: +((?:[\w_-]+\s*)+))?" 1:meta 2:value
+add-highlighter shared/odin/code/directive regex \
+  "#\w+\b" 0:meta
+add-highlighter shared/odin/code/noreturn regex \
+  "\w+ *:: *proc *\([^)]*\) *-> *(!)" 1:red+b
+add-highlighter shared/odin/code/attribute regex \
+  "@(\([^)]+\)|[^\n]+)" 0:meta
 add-highlighter shared/odin/code/function_call regex "\b(\w*)\b\h*(?:\[[\w\s\.,]*\])?\h*\(" 1:function
 
 # Commands
@@ -100,11 +125,94 @@ evaluate-commands %sh{
               or_break or_continue or_else or_return package proc return struct switch
               transmute typeid union using when where'
     attributes=''
-    # ---------------------------------------------------------------------------------------------- #
+    builtins='
+      append                                             non_zero_append_elem_fixed_capacity_string
+      append_elem                                        non_zero_append_elems
+      append_elems                                       non_zero_append_elem_string
+      append_elem_string                                 non_zero_append_soa_elem
+      append_fixed_capacity_elem                         non_zero_append_soa_elems
+      append_fixed_capacity_elems                        non_zero_reserve
+      append_fixed_capacity_string                       non_zero_reserve_dynamic_array
+      append_nothing                                     non_zero_reserve_soa
+      append_nothing_dynamic_array                       non_zero_resize
+      append_nothing_fixed_capacity_dynamic_array        non_zero_resize_dynamic_array
+      append_nothing_soa                                 non_zero_resize_fixed_capacity_dynamic_array
+      append_soa                                         non_zero_resize_soa
+      append_soa_elem                                    ordered_remove
+      append_soa_elems                                   ordered_remove_dynamic_array
+      append_string                                      ordered_remove_fixed_capacity_dynamic_array
+      assert                                             ordered_remove_soa
+      assert_contextless                                 panic
+      assign_at                                          panic_contextless
+      assign_at_elem                                     pop
+      assign_at_elem_fixed_capacity_dynamic_array        pop_dynamic_array
+      assign_at_elems                                    pop_fixed_capacity_dynamic_array
+      assign_at_elems_fixed_capacity_dynamic_array       pop_front
+      assign_at_elem_string                              pop_front_dynamic_array
+      assign_at_elem_string_fixed_capacity_dynamic_array pop_front_fixed_capacity_dynamic_array
+      card                                               pop_front_safe
+      clear                                              pop_front_safe_dynamic_array
+      clear_dynamic_array                                pop_front_safe_fixed_capacity_dynamic_array
+      clear_fixed_capacity_dynamic_array                 pop_safe
+      clear_map                                          pop_safe_dynamic_array
+      clear_soa                                          pop_safe_fixed_capacity_dynamic_array
+      clear_soa_dynamic_array                            raw_soa_footer_dynamic_array
+      copy                                               raw_soa_footer_slice
+      delete                                             remove_range
+      delete_cstring                                     remove_range_dynamic_array
+      delete_cstring16                                   remove_range_fixed_capacity_dynamic_array
+      delete_dynamic_array                               reserve
+      delete_key                                         reserve_dynamic_array
+      delete_map                                         reserve_map
+      delete_slice                                       reserve_soa
+      delete_soa                                         resize
+      delete_soa_dynamic_array                           resize_dynamic_array
+      delete_soa_slice                                   resize_fixed_capacity_dynamic_array
+      delete_string                                      resize_soa
+      delete_string16                                    shrink
+      ensure                                             shrink_dynamic_array
+      ensure_contextless                                 shrink_map
+      free                                               unimplemented
+      free_all                                           unimplemented_contextless
+      init_global_temporary_allocator                    unordered_remove
+      inject_at                                          unordered_remove_dynamic_array
+      inject_at_elem                                     unordered_remove_fixed_capacity_dynamic_array
+      inject_at_elem_fixed_capacity_dynamic_array        unordered_remove_soa
+      inject_at_elems                                    abs
+      inject_at_elems_fixed_capacity_dynamic_array       conj
+      inject_at_elem_soa                                 max
+      inject_at_elems_soa                                quaternion
+      inject_at_elem_string                              swizzle
+      inject_at_elem_string_fixed_capacity_dynamic_array align_of
+      inject_at_soa                                      expand_values
+      make                                               min
+      make_aligned                                       raw_data
+      make_dynamic_array                                 typeid_of
+      make_dynamic_array_len                             cap
+      make_dynamic_array_len_cap                         imag
+      make_map                                           offset_of
+      make_map_cap                                       real
+      make_multi_pointer                                 type_info_of
+      make_slice                                         clamp
+      make_soa                                           jmag
+      make_soa_aligned                                   offset_of_by_string
+      make_soa_dynamic_array                             size_of
+      make_soa_dynamic_array_len                         type_of
+      make_soa_dynamic_array_len_cap                     complex
+      make_soa_slice                                     kmag
+      map_entry                                          offset_of_member
+      map_insert                                         soa_unzip
+      map_upsert                                         unreachable
+      new                                                compress_values
+      new_aligned                                        len
+      new_clone                                          offset_of_selector
+      non_zero_append                                    soa_zip
+      non_zero_append_elem
+    '
     join() { sep=$2; eval set -- $1; IFS="$sep"; echo "$*"; }
-    # ---------------------------------------------------------------------------------------------- #
+
     add_highlighter() { printf "add-highlighter shared/odin/code/ regex %s %s\n" "$1" "$2"; }
-    # ---------------------------------------------------------------------------------------------- #
+
     add_word_highlighter() {
       while [ $# -gt 0 ]; do
           words=$1 face=$2; shift 2
@@ -112,11 +220,10 @@ evaluate-commands %sh{
           add_highlighter "$regex" "1:$face"
       done
     }
-    # ---------------------------------------------------------------------------------------------- #
-    printf %s\\n "declare-option str-list odin_static_words $(join "${values} ${types} ${keywords} ${attributes} ${modules}" ' ')"
-    # ---------------------------------------------------------------------------------------------- #
-    add_word_highlighter "$values" "value" "$types" "type" "$keywords" "keyword" "$attributes" "attribute"
-    # ---------------------------------------------------------------------------------------------- #
+
+    printf %s\\n "declare-option str-list odin_static_words $(join "${values} ${types} ${keywords} ${attributes} ${modules} ${builtins}" ' ')"
+
+    add_word_highlighter "$values" "value" "$types" "type" "$keywords" "keyword" "$attributes" "attribute" "$builtins" "builtin"
 }
 
 §

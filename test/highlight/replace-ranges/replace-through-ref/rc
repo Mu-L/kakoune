@@ -1,0 +1,3 @@
+declare-option range-specs test_ranges %val{timestamp} '1.3+0|A'
+add-highlighter shared/test replace-ranges test_ranges
+add-highlighter window/ ref -passes replace test

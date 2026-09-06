@@ -210,11 +210,12 @@ add-highlighter <path>/<name> <type> <params>...
 In order to specify which kinds of highlighters can be added to a
 given group, the *-passes* flag set can be passed along with the group
 name. Possible values for this option can be one or several (separated
-with a pipe sign) of *colorize*, *move* or *wrap* (default: *colorize*):
+with a pipe sign) of *colorize*, *move*, *wrap* or *replace*
+(default: *colorize*):
 
---------------------------------------------------------------
-add-highlighter window/<name> group -passes colorize|move|wrap
---------------------------------------------------------------
+----------------------------------------------------------------------
+add-highlighter window/<name> group -passes colorize|move|wrap|replace
+----------------------------------------------------------------------
 
 == Regions highlighters
 
@@ -323,3 +324,13 @@ add-highlighter window/ ref <name>
 ----------------------------------
 
 The ref can reference any named highlighter in the shared scope.
+
+Like the group highlighter, ref accepts a *-passes* flag set selecting the
+kinds of highlighters that are forwarded (default: *colorize*). A shared
+highlighter running in another pass, such as *replace-ranges*, needs the
+matching pass to be listed explicitly:
+
+---------------------------------------------------------
+add-highlighter shared/<name> replace-ranges <option_name>
+add-highlighter window/ ref -passes replace <name>
+---------------------------------------------------------

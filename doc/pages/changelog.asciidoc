@@ -9,6 +9,10 @@ released versions.
 
 * A local scope is now active when evaluating a command line
 
+* The `-passes` switch of the `group` and `ref` highlighters now accepts
+  `replace`, allowing `replace-ranges` highlighters to be put in groups
+  and referenced from the shared scope
+
 == Kakoune 2026.05.21
 
 * Support the `\N` escape sequence in regex (like in PCRE, matches `[^\n]`).
